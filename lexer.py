@@ -1,7 +1,7 @@
 """The component of the program that analyzes the original strings and parses them, returning tokens."""
 
 # Initial imports
-from objects import Token, Action
+from objects import Token, Action, ActionStack
 
 # Make some exception types.
 class LexicalError(Exception): ...
@@ -36,11 +36,10 @@ def lexical_analysis(code_string):
         if code_string[-1] != '\n':
             code_string += '\n'
 
-    print(code_string.__repr__())
-
     tokens = []
     queue = ''
     context_stack = generate_context_stack()
+    # action_stack = ActionStack() # Still need to develop.
 
     # Valid chars for indentifiers.
     VALID_IDENTIFIER_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_:'
@@ -142,23 +141,24 @@ def lexical_analysis(code_string):
 
             elif action.head == 'end_context':
 
-                token_type = None
-                token_value = None
+                token_head = None
+                token_body = None
 
                 if context_stack[-1].startswith('literal_string_'):
-                    token_type = 'str'
-                    token_value = queue
+                    token_head = 'str'
+                    token_body = queue
 
                 elif context_stack[-1] == 'literal_number':
                     # TODO: add here part of the support for more number types (like float)
-                    token_type = 'int'
-                    token_value = int(queue)
+                    token_head = 'int'
+                    token_body = int(queue)
 
                 elif context_stack[-1] == 'identifier':
-                    token_type = 'identifier'
-                    token_value = queue
+                    token_head = 'identifier'
+                    token_body = queue
 
-                token_to_append = Token(token_type, queue)
+                # token_to_append = Token(token_head, queue)
+                token_to_append = Token(token_head, token_body)
                 tokens.append(token_to_append)
 
                 # Clear the queue and remove the current context from the stack
@@ -169,13 +169,3 @@ def lexical_analysis(code_string):
                 raise LexicalError(f'Invalid action: {action}')
 
     return tokens
-
-def generate_syntax_tree(list_, level=0):
-
-    """Turns the lexical analysis output into a tree."""
-
-    for token in list_:
-
-        print('  '*level + '- Token: ' + token.type)
-        if token.value != None:
-            print('  '*(level+1) + 'Type: ' + str(token.value))

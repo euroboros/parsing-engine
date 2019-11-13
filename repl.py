@@ -8,14 +8,15 @@ def main():
 
     # Import useful modules
     import lexer
+    import parser
 
     try:
         while True:
             input_ = input('repl> ')
-            a = lexer.lexical_analysis(input_)
-            print(a)
-            tree = lexer.generate_syntax_tree(a)
+            parser.complete_analysis(input_)
     except KeyboardInterrupt:
+        print('\nREPL finished.')
+    except EOFError:
         print('\nREPL finished.')
 
 if __name__ == '__main__':
